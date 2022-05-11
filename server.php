@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 function logger(string $level, string $message, array $context = [])
 {
@@ -10,8 +10,14 @@ function logger(string $level, string $message, array $context = [])
 }
 
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
-if (preg_match('#/status/(\d+)#', $requestUri, $statusMatches)) {
-    http_response_code((int)$statusMatches[1]);
+if (preg_match('#/status/(.+)#', $requestUri, $statusMatches)) {
+    if ($statusMatches[1] === 'random') {
+        $availableStatuses = [200, 500];
+        $statusCode = $availableStatuses[array_rand($availableStatuses)];
+    } else {
+        $statusCode = (int)$statusMatches[1];
+    }
+    http_response_code($statusCode);
 } else if (preg_match('#/redirect/(.+)#', $requestUri, $redirectMatches)) {
     header("Location {$redirectMatches[1]}", true, 302);
 }
@@ -25,10 +31,8 @@ $context = [
     'php://input' => file_get_contents('php://input')
 ];
 
-if (isset($_GET['debug'])) {
-    echo '<pre>';
-    var_dump($context);
-}
+echo '<pre>';
+var_dump($context);
 
 logger('INFO', 'incoming request', $context);
 
