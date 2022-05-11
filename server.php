@@ -12,7 +12,7 @@ function logger(string $level, string $message, array $context = [])
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 if (preg_match('#/status/(.+)#', $requestUri, $statusMatches)) {
     if ($statusMatches[1] === 'random') {
-        $availableStatuses = [200, 500];
+        $availableStatuses = [200, 401, 500];
         $statusCode = $availableStatuses[array_rand($availableStatuses)];
     } else {
         $statusCode = (int)$statusMatches[1];
