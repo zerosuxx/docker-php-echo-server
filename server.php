@@ -11,7 +11,7 @@ function logger(string $level, string $message, array $context = [])
 
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 if (preg_match('#/status/(\d+)#', $requestUri, $statusMatches)) {
-    http_response_code($statusMatches[1]);
+    http_response_code((int)$statusMatches[1]);
 } else if (preg_match('#/redirect/(.+)#', $requestUri, $redirectMatches)) {
     header("Location {$redirectMatches[1]}", true, 302);
 }
