@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 function logger(string $level, string $message, array $context = [])
 {
@@ -25,6 +25,8 @@ if (preg_match('#/status/(.+)#', $requestUri, $statusMatches)) {
 $context = [
     'VERSION' => VERSION,
     'HOST' => gethostname(),
+    'NODE_NAME' => $_ENV['NODE_NAME'] ?? gethostname(),
+    'ENV' => $_ENV,
     'SERVER' => $_SERVER,
     'GET' => $_GET,
     'POST' => $_POST,
@@ -35,4 +37,3 @@ echo '<pre>';
 var_dump($context);
 
 logger('INFO', 'incoming request', $context);
-
