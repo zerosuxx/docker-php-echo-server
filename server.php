@@ -2,14 +2,62 @@
 
 declare(strict_types=1);
 
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 
-function logger(string $level, string $message, array $context = [])
+function jsonEncode(mixed $data): string
 {
-    file_put_contents('php://stderr', json_encode(array_merge(['level' => $level, 'message' => $message], $context), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL);
+    return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS);
 }
 
-$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+function logger(string $level, string $message, array $context = []): void
+{
+    file_put_contents('php://stderr', jsonEncode(array_merge(['level' => $level, 'message' => $message], $context)) . PHP_EOL);
+}
+
+function getInput(int $inputType, string $key, string $default = null): ?string
+{
+    $value = filter_input($inputType, $key);
+
+    if ($value === null) {
+        return $default;
+    }
+
+    return (string)$value;
+}
+
+function getServerParam(string $key, string $default = null): ?string
+{
+    return getInput(INPUT_SERVER, $key, $default);
+}
+
+function getEnvParam(string $key, string $default = null): ?string
+{
+    return getInput(INPUT_ENV, $key, $default);
+}
+
+function getProxyHeaders(): array
+{
+    $proxyHeaders = [];
+    $proxyKeys = [
+        'HTTP_X_REAL_IP',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_X_FORWARDED_HOST',
+        'HTTP_X_FORWARDED_PORT',
+        'HTTP_X_FORWARDED_PROTO'
+    ];
+    foreach ($proxyKeys as $proxyKey) {
+        $proxyValue = getServerParam($proxyKey);
+        if ($proxyValue === null) {
+            continue;
+        }
+        $key = str_replace($proxyKey, 'HTTP_X_', '');
+        $proxyHeaders[$key] = $proxyValue;
+    }
+
+    return $proxyHeaders;
+}
+
+$requestUri = getServerParam('REQUEST_URI') ?: '/';
 if (preg_match('#/status/(.+)#', $requestUri, $statusMatches)) {
     if ($statusMatches[1] === 'random') {
         $availableStatuses = [200, 401, 500];
@@ -19,21 +67,44 @@ if (preg_match('#/status/(.+)#', $requestUri, $statusMatches)) {
     }
     http_response_code($statusCode);
 } else if (preg_match('#/redirect/(.+)#', $requestUri, $redirectMatches)) {
-    header("Location {$redirectMatches[1]}", true, 302);
+    header("Location: $redirectMatches[1]", true, 302);
 }
 
-$context = [
+$hostName = gethostname();
+$userAgent = getServerParam('HTTP_USER_AGENT', 'N/A');
+$response = [
     'VERSION' => VERSION,
-    'HOST' => gethostname(),
-    'NODE_NAME' => $_ENV['NODE_NAME'] ?? gethostname(),
-    'ENV' => $_ENV,
-    'SERVER' => $_SERVER,
-    'GET' => $_GET,
-    'POST' => $_POST,
-    'php://input' => file_get_contents('php://input')
+    'HOST' => $hostName,
+    'NODE_NAME' => getEnvParam('NODE_NAME', $hostName),
+    'USER_AGENT' => $userAgent,
+    'REMOTE_IP' => getServerParam('REMOTE_ADDR'),
+    'PROTOCOL' => getServerParam('SERVER_PROTOCOL'),
+    'URI' => $requestUri,
+    'METHOD' => getServerParam('REQUEST_METHOD'),
+    'COOKIE' => $_COOKIE,
+    'QUERY' => $_GET,
+    'PARSED_BODY' => $_POST,
+    'RAW_BODY' => file_get_contents('php://input')
 ];
 
-echo '<pre>';
-var_dump($context);
+$proxyHeaders = getProxyHeaders();
+if (count($proxyHeaders) > 0) {
+    $response['PROXY'] = $proxyHeaders;
+}
 
-logger('INFO', 'incoming request', $context);
+$debugMode = (bool)getServerParam('HTTP_DEBUG');
+if ($debugMode) {
+    $response['SERVER'] = $_SERVER;
+    $response['ENV'] = $_ENV;
+}
+
+if (str_starts_with($userAgent, 'curl')
+    || str_contains(getServerParam('HTTP_CONTENT_TYPE', ''), 'application/json')) {
+    header('Content-Type: application/json');
+    echo jsonEncode($response);
+} else {
+    echo '<pre>';
+    var_dump($response);
+}
+
+logger('INFO', 'incoming request', $response);
