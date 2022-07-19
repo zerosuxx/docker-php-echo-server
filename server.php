@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const VERSION = '0.4.1';
+const VERSION = '0.4.2';
 
 function jsonEncode(mixed $data): string
 {
@@ -74,7 +74,7 @@ $hostName = gethostname();
 $userAgent = getServerParam('HTTP_USER_AGENT', 'N/A');
 $response = [
     'VERSION' => VERSION,
-    'HOST' => $hostName,
+    'HOST_NAME' => $hostName,
     'NODE_NAME' => getEnvParam('NODE_NAME', $hostName),
     'USER_AGENT' => $userAgent,
     'REMOTE_IP' => getServerParam('REMOTE_ADDR'),
