@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const VERSION = '0.4.0';
+const VERSION = '0.4.1';
 
 function jsonEncode(mixed $data): string
 {
@@ -50,7 +50,7 @@ function getProxyHeaders(): array
         if ($proxyValue === null) {
             continue;
         }
-        $key = str_replace($proxyKey, 'HTTP_X_', '');
+        $key = str_replace('HTTP_X_', '', $proxyKey);
         $proxyHeaders[$key] = $proxyValue;
     }
 
