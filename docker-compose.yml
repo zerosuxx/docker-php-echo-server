@@ -4,8 +4,9 @@ services:
   app:
     build: .
     environment:
-      NODE_NAME: 'docker'
+      NODE_NAME: 'local'
     volumes:
-      - ./server.php:/home/app/server.php
+      - ./src:/home/app/src
+      - ./bin:/home/app/bin
     ports:
       - '18080:8080'

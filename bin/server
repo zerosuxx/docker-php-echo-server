@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+use App\RequestHandler;
+use Swoole\HTTP\Server;
+use Swoole\HTTP\Request;
+use Swoole\HTTP\Response;
+
+const VERSION = '0.5.0';
+
+$server = new Server('0.0.0.0', 8080);
+
+$server->on('start', function (Server $server) {
+    echo "Swoole http server is started at http://$server->host:$server->port" . PHP_EOL;
+});
+
+$server->on('WorkerStart', function() {
+    require __DIR__ . '/../src/RequestHandler.php';
+});
+
+$server->on('request', function (Request $request, Response $response) use($server) {
+    if (getenv('NODE_NAME') === 'local') {
+        $server->reload();
+    }
+
+    (new RequestHandler($server, $_ENV, VERSION))->handle($request, $response);
+});
+
+$server->start();
