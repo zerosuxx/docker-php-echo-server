@@ -1,21 +1,11 @@
 FROM php:8.1-alpine AS base
 
+RUN apk add --no-cache libpq libstdc++
+
 RUN adduser --disabled-password --gecos "" app
 
-FROM base AS builder
-
-RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS}
-
-RUN pecl install swoole
-
-RUN docker-php-ext-enable swoole
-
-FROM base AS app
-
-RUN apk add --no-cache libstdc++
-
-COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+COPY --from=phpswoole/swoole:php8.1-alpine /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=phpswoole/swoole:php8.1-alpine /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 
 USER app
 
