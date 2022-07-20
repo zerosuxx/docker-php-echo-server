@@ -28,7 +28,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and deploy docker image
         run: |
-          docker pull ${{ env.IMAGE_NAME }} || true
           export VERSION=$(git describe --tags)
           echo $VERSION
           sed -i "s/d.e.v/$VERSION/g" bin/server
