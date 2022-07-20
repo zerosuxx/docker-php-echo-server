@@ -25,6 +25,8 @@ class RequestHandler
         echo $this->jsonEncode([
             'request' => $request,
             'server' => $this->server,
+            'stats' => $this->server->stats(),
+            'connection_info' => $this->server->connection_info($request->fd),
             'env' => $this->env
         ]);
 
