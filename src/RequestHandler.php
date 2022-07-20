@@ -22,7 +22,11 @@ class RequestHandler
 
     public function handle(Request $request, Response $response): void
     {
-        echo $this->jsonEncode($request);
+        echo $this->jsonEncode([
+            'request' => $request,
+            'server' => $this->server,
+            'env' => $this->env
+        ]);
 
         $hostName = gethostname();
         $responseBody = [
@@ -40,7 +44,7 @@ class RequestHandler
             'RAW_BODY' => $request->getContent()
         ];
 
-        $debugMode = (bool)$request->header['debug'];
+        $debugMode = (bool)($request->header['debug'] ?? false);
         if ($debugMode) {
             $responseBody['SERVER'] = $request->server;
             $responseBody['ENV'] = $this->env;
