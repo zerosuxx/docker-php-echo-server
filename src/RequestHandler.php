@@ -13,6 +13,16 @@ class RequestHandler
     private array $env;
     private string $version;
 
+    private array $additionalHeaderKeys = [
+        'x-request-id',
+        'x-real-ip',
+        'x-forwarded-for',
+        'x-forwarded-host',
+        'x-forwarded-port',
+        'x-forwarded-proto',
+        'x-forwarded-scheme'
+    ];
+
     public function __construct(Server $server, array $env, string $version)
     {
         $this->server = $server;
@@ -41,6 +51,7 @@ class RequestHandler
             'PROTOCOL' => $request->server['server_protocol'],
             'URI' => $request->server['request_uri'],
             'METHOD' => $request->server['request_method'],
+            'ADDITIONAL_HEADERS' => $this->getAdditionalHeaders($request->header),
             'COOKIE' => $request->cookie ?? [],
             'QUERY' => $request->get ?? [],
             'PARSED_BODY' => $request->post ?? [],
@@ -58,6 +69,20 @@ class RequestHandler
         $this->handleActions($request, $response);
 
         $response->end($this->jsonEncode($responseBody));
+    }
+
+    private function getAdditionalHeaders(array $headers): array
+    {
+        $additionalHeaders = [];
+        foreach ($this->additionalHeaderKeys as $key) {
+            if (!isset($headers[$key])) {
+                continue;
+            }
+
+            $additionalHeaders[$key] = $headers[$key];
+        }
+
+        return $additionalHeaders;
     }
 
     private function handleActions(Request $request, Response $response): void
