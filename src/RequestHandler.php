@@ -23,6 +23,7 @@ class RequestHandler
     public function handle(Request $request, Response $response): void
     {
         echo $this->jsonEncode([
+            'version' => $this->version,
             'request' => $request,
             'server' => $this->server,
             'stats' => $this->server->stats(),

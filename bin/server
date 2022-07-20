@@ -7,12 +7,13 @@ use Swoole\HTTP\Server;
 use Swoole\HTTP\Request;
 use Swoole\HTTP\Response;
 
-const VERSION = '0.5.0';
+const VERSION = 'd.e.v';
 
 $server = new Server('0.0.0.0', 8080);
 
 $server->on('start', function (Server $server) {
-    echo "Swoole http server is started at http://$server->host:$server->port" . PHP_EOL;
+    $appVersion = VERSION;
+    echo "Echo server ($appVersion) is started at http://$server->host:$server->port" . PHP_EOL;
 });
 
 $server->on('WorkerStart', function() {
