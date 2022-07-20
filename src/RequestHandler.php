@@ -22,13 +22,16 @@ class RequestHandler
 
     public function handle(Request $request, Response $response): void
     {
+        file_put_contents('php://stderr', 'stderr' . PHP_EOL);
+        file_put_contents('php://stdout', 'stdout' . PHP_EOL);
+        echo 'echo' . PHP_EOL;
         echo $this->jsonEncode([
             'request' => $request,
             'server' => $this->server,
             'stats' => $this->server->stats(),
             'connection_info' => $this->server->connection_info($request->fd),
             'env' => $this->env
-        ]);
+        ]) . PHP_EOL;
 
         $hostName = gethostname();
         $responseBody = [
