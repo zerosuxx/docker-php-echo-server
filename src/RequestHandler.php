@@ -41,6 +41,8 @@ class RequestHandler
             'env' => $this->env
         ]) . PHP_EOL;
 
+        $response->header('Server', "EchoServer ($this->version)");
+
         $hostName = gethostname();
         $responseBody = [
             'VERSION' => $this->version,

@@ -11,6 +11,10 @@ const VERSION = 'd.e.v';
 
 $server = new Server('0.0.0.0', 8080);
 
+$server->set([
+    'reload_async' => true
+]);
+
 $server->on('start', function (Server $server) {
     $appVersion = VERSION;
     echo "Echo server ($appVersion) is started at http://$server->host:$server->port" . PHP_EOL;
