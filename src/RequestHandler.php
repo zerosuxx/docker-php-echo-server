@@ -82,7 +82,7 @@ class RequestHandler
                 'VERSION' => $this->version,
                 'HOST_NAME' => $hostName,
                 'NODE_NAME' => $this->env['NODE_NAME'] ?? $hostName,
-                'USER_AGENT' => $request->header['user-agent'],
+                'USER_AGENT' => $request->header['user-agent'] ?? 'Unknown',
                 'REMOTE_IP' => $request->server['remote_addr'],
                 'PROTOCOL' => $request->server['server_protocol'],
                 'URI' => $request->server['request_uri'],
