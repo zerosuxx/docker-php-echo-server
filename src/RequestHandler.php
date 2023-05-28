@@ -58,7 +58,7 @@ class RequestHandler
     {
         $requestUri = $request->server['request_uri'];
         if ($requestUri === '/healthcheck') {
-            $response->end($this->jsonEncode(['success' => true]));
+            $response->end($this->encoder->json(['success' => true]));
         } else if (preg_match('#/status/(.+)#', $requestUri, $statusMatches)) {
             if ($statusMatches[1] === 'random') {
                 $availableStatuses = [200, 401, 500];
