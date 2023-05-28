@@ -2,7 +2,10 @@
 <?php
 declare(strict_types=1);
 
+require __DIR__ . '/../src/Encoder.php';
+
 use App\RequestHandler;
+use App\Encoder;
 use Swoole\HTTP\Server;
 use Swoole\HTTP\Request;
 use Swoole\HTTP\Response;
@@ -10,26 +13,30 @@ use Swoole\HTTP\Response;
 const VERSION = 'd.e.v';
 
 $server = new Server('0.0.0.0', 8080);
+$encoder = new Encoder();
 
 $server->set([
     'reload_async' => true
 ]);
 
-$server->on('start', function (Server $server) {
-    $appVersion = VERSION;
-    echo "Echo server ($appVersion) is started at http://$server->host:$server->port" . PHP_EOL;
+$server->on('start', function (Server $server) use ($encoder) {
+    echo $encoder->json([
+        'message' => 'Echo server started.',
+        'version' => VERSION,
+        'address' => "http://{$server->host}:{$server->port}",
+    ]) . PHP_EOL;
 });
 
 $server->on('WorkerStart', function() {
     require __DIR__ . '/../src/RequestHandler.php';
 });
 
-$server->on('request', function (Request $request, Response $response) use($server) {
+$server->on('request', function (Request $request, Response $response) use ($server, $encoder) {
     if (getenv('NODE_NAME') === 'local') {
         $server->reload();
     }
 
-    (new RequestHandler($server, $_ENV, VERSION))->handle($request, $response);
+    (new RequestHandler($server, $encoder, $_ENV, VERSION))->handle($request, $response);
 });
 
 $server->start();

@@ -10,6 +10,7 @@ use Swoole\HTTP\Response;
 class RequestHandler
 {
     private Server $server;
+    private Encoder $encoder;
     private array $env;
     private string $version;
 
@@ -23,9 +24,10 @@ class RequestHandler
         'x-forwarded-scheme'
     ];
 
-    public function __construct(Server $server, array $env, string $version)
+    public function __construct(Server $server, Encoder $encoder, array $env, string $version)
     {
         $this->server = $server;
+        $this->encoder = $encoder;
         $this->env = $env;
         $this->version = $version;
     }
@@ -68,12 +70,12 @@ class RequestHandler
         } else if (preg_match('#/redirect/(.+)#', $requestUri, $redirectMatches)) {
             $response->redirect($redirectMatches[1]);
         } else {
-            echo $this->jsonEncode([
+            echo $this->encoder->json([
                 'version' => $this->version,
                 'request' => $request,
                 'server' => $this->server,
                 'stats' => $this->server->stats(),
-                'connection_info' => $this->server->connection_info($request->fd),
+                'client_info' => $this->server->getClientInfo($request->fd),
                 'env' => $this->env
             ]) . PHP_EOL;
             
@@ -100,12 +102,7 @@ class RequestHandler
                 $responseBody['ENV'] = $this->env;
             }
 
-            $response->end($this->jsonEncode($responseBody));
+            $response->end($this->encoder->json($responseBody));
         }
-    }
-
-    private function jsonEncode(mixed $data): string
-    {
-        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS);
     }
 }
