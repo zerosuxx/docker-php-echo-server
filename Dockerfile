@@ -2,8 +2,7 @@ FROM php:8.2-alpine AS base
 
 RUN apk add --no-cache \
     libpq \
-    libstdc++ \
-    openssl1.1-compat
+    libstdc++
 
 RUN adduser \
     --disabled-password \
