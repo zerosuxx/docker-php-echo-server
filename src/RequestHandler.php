@@ -21,7 +21,9 @@ class RequestHandler
         'x-forwarded-host',
         'x-forwarded-port',
         'x-forwarded-proto',
-        'x-forwarded-scheme'
+        'x-forwarded-scheme',
+        'x-scheme',
+        'x-original-forwarded-for',
     ];
 
     public function __construct(Server $server, Encoder $encoder, array $env, string $version)
