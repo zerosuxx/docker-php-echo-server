@@ -1,4 +1,4 @@
-FROM php:8.2-alpine AS base
+FROM php:8.3-alpine3.18 AS base
 
 RUN apk add --no-cache \
     libpq \
@@ -11,8 +11,8 @@ RUN adduser \
 
 USER app
 
-COPY --from=openswoole/swoole:php8.2-alpine /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-COPY --from=openswoole/swoole:php8.2-alpine /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+COPY --from=openswoole/swoole:php8.3-alpine /usr/local/lib/php/extensions /usr/local/lib/php/extensions/
+COPY --from=openswoole/swoole:php8.3-alpine /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 
 COPY ./src /home/app/src
 COPY ./bin/server /home/app/bin/server
