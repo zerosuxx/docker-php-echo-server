@@ -102,6 +102,7 @@ class RequestHandler
             if ($debugMode) {
                 $responseBody['SERVER'] = $request->server;
                 $responseBody['ENV'] = $this->env;
+                $responseBody['HEADER'] = $request->header;
             }
 
             $response->end($this->encoder->json($responseBody));
