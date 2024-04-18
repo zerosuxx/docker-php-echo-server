@@ -98,7 +98,7 @@ class RequestHandler
                 'RAW_BODY' => $request->getContent()
             ];
 
-            $debugMode = (bool)($request->header['debug'] ?? false);
+            $debugMode = (bool)($request->header['debug'] ?? $request->get['debug'] ?? false);
             if ($debugMode) {
                 $responseBody['SERVER'] = $request->server;
                 $responseBody['ENV'] = $this->env;
