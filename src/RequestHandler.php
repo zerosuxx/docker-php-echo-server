@@ -14,18 +14,6 @@ class RequestHandler
     private array $env;
     private string $version;
 
-    private array $additionalHeaderKeys = [
-        'x-request-id',
-        'x-real-ip',
-        'x-forwarded-for',
-        'x-forwarded-host',
-        'x-forwarded-port',
-        'x-forwarded-proto',
-        'x-forwarded-scheme',
-        'x-scheme',
-        'x-original-forwarded-for',
-    ];
-
     public function __construct(Server $server, Encoder $encoder, array $env, string $version)
     {
         $this->server = $server;
@@ -91,18 +79,17 @@ class RequestHandler
                 'PROTOCOL' => $request->server['server_protocol'],
                 'URI' => $request->server['request_uri'],
                 'METHOD' => $request->server['request_method'],
-                'ADDITIONAL_HEADERS' => $this->getAdditionalHeaders($request->header),
+                'HEADER' => $request->header,
                 'COOKIE' => $request->cookie ?? [],
                 'QUERY' => $request->get ?? [],
                 'PARSED_BODY' => $request->post ?? [],
                 'RAW_BODY' => $request->getContent()
             ];
 
-            $debugMode = (bool)($request->header['debug'] ?? $request->get['debug'] ?? false);
+            $debugMode = isset($request->header['debug']) || isset($request->get['debug']);
             if ($debugMode) {
                 $responseBody['SERVER'] = $request->server;
                 $responseBody['ENV'] = $this->env;
-                $responseBody['HEADER'] = $request->header;
             }
 
             $response->end($this->encoder->json($responseBody));
