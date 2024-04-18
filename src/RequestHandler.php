@@ -30,20 +30,6 @@ class RequestHandler
         $this->handleActions($request, $response);
     }
 
-    private function getAdditionalHeaders(array $headers): array
-    {
-        $additionalHeaders = [];
-        foreach ($this->additionalHeaderKeys as $key) {
-            if (!isset($headers[$key])) {
-                continue;
-            }
-
-            $additionalHeaders[$key] = $headers[$key];
-        }
-
-        return $additionalHeaders;
-    }
-
     private function handleActions(Request $request, Response $response): void
     {
         $requestUri = $request->server['request_uri'];
